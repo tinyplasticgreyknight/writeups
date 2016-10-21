@@ -1,0 +1,13 @@
+digraph {
+	node [shape=rect];
+	edge [fontsize=10];
+	":start:";
+	"State<Empty>";
+	"State<string>";
+	"Widget";
+
+	":start:" -> "State<Empty>" [label="New"];
+	"State<Empty>" -> "State<string>" [label="WithName"];
+	"State<string>" -> "Widget" [label="Build"];
+}
+

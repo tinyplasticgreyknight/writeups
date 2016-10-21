@@ -1,0 +1,24 @@
+digraph {
+	node [shape=rect];
+	edge [fontsize=10];
+	":start:";
+	"State<Empty, Empty, Empty>";
+	"State<Empty, int, Empty>";
+	"State<Empty, int, GrommitSpecies>";
+	"State<string, Empty, Empty>";
+	"State<string, int, Empty>";
+	"State<string, int, GrommitSpecies>";
+	"Widget";
+
+	":start:" -> "State<Empty, Empty, Empty>" [label="New"];
+	"State<Empty, Empty, Empty>" -> "State<string, Empty, Empty>" [label="WithName"];
+	"State<Empty, int, Empty>" -> "State<string, int, Empty>" [label="WithName"];
+	"State<Empty, int, GrommitSpecies>" -> "State<string, int, GrommitSpecies>" [label="WithName"];
+	"State<Empty, Empty, Empty>" -> "State<Empty, int, Empty>" [label="WithGrommits"];
+	"State<string, Empty, Empty>" -> "State<string, int, Empty>" [label="WithGrommits"];
+	"State<string, int, Empty>" -> "State<string, int, GrommitSpecies>" [label="WithGrommitSpecies"];
+	"State<Empty, int, Empty>" -> "State<Empty, int, GrommitSpecies>" [label="WithGrommitSpecies"];
+	"State<string, int, GrommitSpecies>" -> "Widget" [label="Build"];
+	"State<string, Empty, Empty>" -> "Widget" [label="Build()", color="#00cc00"];
+}
+

@@ -1,0 +1,18 @@
+digraph {
+	node [shape=rect];
+	edge [fontsize=10];
+	":start:";
+	"State<Empty, Empty>";
+	"State<string, Empty>";
+	"State<Empty, int>";
+	"State<string, int>";
+	"Widget";
+
+	":start:" -> "State<Empty, Empty>" [label="New"];
+	"State<Empty, Empty>" -> "State<string, Empty>" [label="WithName"];
+	"State<Empty, int>" -> "State<string, int>" [label="WithName"];
+	"State<Empty, Empty>" -> "State<Empty, int>" [label="WithGrommits"];
+	"State<string, Empty>" -> "State<string, int>" [label="WithGrommits"];
+	"State<string, int>" -> "Widget" [label="Build"];
+}
+
