@@ -1,0 +1,124 @@
+\documentclass{article}
+\usepackage[a4paper,left=20mm,right=20mm,top=20mm,bottom=20mm]{geometry}
+\usepackage{listings}
+\usepackage{tikz-uml}
+\usepackage{xcolor}
+\usepackage{color}
+\usepackage[T1]{fontenc}
+\usepackage[scaled]{beramono}
+\usepackage[toc,page]{appendix}
+\usepackage{titlesec}
+
+\newcommand{\sectionbreak}{\clearpage}
+
+\definecolor{colourborder}{rgb}{0.3,0.3,0.3}
+\definecolor{colourbackground}{rgb}{1,1,1}
+\definecolor{colouridentifier}{rgb}{0.2,0.2,0.2}
+\definecolor{colourkeyword}{rgb}{0.4,0.4,1}
+\definecolor{colourcomment}{rgb}{0.5,0.5,0.5}
+\definecolor{colourstring}{rgb}{0,0.7,0}
+\definecolor{colourpunctuation}{rgb}{0.9,0.5,0}
+\definecolor{colourlineno}{rgb}{0.5,0.5,0.5}
+
+\lstdefinestyle{csharp}{language=[Sharp]C,
+  frame=lrtb,
+  numbers=left,
+  numbersep=1em,
+  tabsize=4,
+  backgroundcolor=\color{colourbackground},
+  rulecolor=\color{colourborder},
+  showspaces=false,
+  showtabs=false,
+  breaklines=false,
+  showstringspaces=false,
+  breakatwhitespace=false,
+  basicstyle=\small\ttfamily\color{colourpunctuation},
+  numberstyle=\tiny\color{colourlineno},
+  identifierstyle=\color{colouridentifier},
+  commentstyle=\color{colourcomment}\itshape,
+  stringstyle=\color{colourstring},
+  keywordstyle=\color{colourkeyword}\bfseries
+}
+\newcommand{\codelisting}[1]{\lstinputlisting[caption=#1, style=csharp]{#1}}
+
+\begin{document}
+
+\title{Downcasting considered harmful}
+\author{}
+\date{}
+\maketitle
+
+Downcasting (casting a base type to a derived type) is bad news.  The cast's safety relies on human knowledge of the code, not compile-time guarantees.  It is better to give as much information to the compiler as possible, so that it can check casts before they become a problem.
+
+\section{Widget and grommit classes}
+
+Presented here are a couple of grommit types, and an interface for the widgets which use them.
+
+\vspace{1em}
+
+\begin{tikzpicture}
+  \umlinterface[x=6,y=4]{IWidget}{+ AttachedGrommit : IGrommit}{+ GetSize() : uint}
+  \umlinterface[x=0,y=2.5]{IGrommit}{}{+ GetLength() : uint}
+  \umlclass[x=5,y=0]{DatabaseGrommit}{
+    + dbconn : DatabaseConnection
+  }{
+    + .ctor(initialLen : uint, dbconn : DatabaseConnection) \\
+    + SetLength(length : uint) : void
+  }
+  \umlemptyclass[x=-2.2,y=0]{ZeroGrommit}
+  \umlnote[x=-1,y=-0.5,width=4.5em]{ZeroGrommit}{returns 0}
+  \umlVHinherit{DatabaseGrommit}{IGrommit}
+  \umlVHinherit{ZeroGrommit}{IGrommit}
+  \umlHVaggreg{IWidget}{IGrommit}
+\end{tikzpicture}
+
+\vspace{1em}
+
+A very basic widget might be:
+
+\codelisting{Widget1.cs}
+
+\section{Grommit-modifying widget}
+
+Now suppose we need a kind of widget which can modify its grommit's size.  This is no problem, since we're using a {\tt DatabaseGrommit}, and that already exposes a means of modifying its size.
+
+Unfortunately the class was written to use a downcast to access the {\tt IGrommit} in the {\tt AttachedGrommit} property as a {\tt DatabaseGrommit}:
+
+\codelisting{Widget2.cs}
+
+This is bad because we've thrown away important type information that the compiler could have used to benefit us.
+First we store the {\tt DatabaseGrommit} in a slot of type {\tt IGrommit}.  Later, we pull the value out again and manually (uh-oh!) reapply the {\tt DatabaseGrommit} type.  Since that cast will only be checked at runtime, it is now possible for us to make mistakes that the compiler would otherwise have caught easily.
+
+\section{Everything goes horribly wrong}
+
+A well-meaning developer notices that {\tt Widget1}'s grommit only ever has size zero, so it can be replaced with a {\tt ZeroGrommit} to save an expensive database query.  Since {\tt Widget2} appears to be doing the same thing, they also replace that grommit in the same way.  {\tt Widget2} now looks like this:
+
+\codelisting{Widget2b.cs}
+
+This will compile quite happily, but will fail at runtime in {\tt ApplyPlumbus}.  If this is a rarely-used and untested method, the error might not be noticed for some time.
+
+\section{Correcting the problem}
+
+How do we fix this?  Firstly, notice that the contract of {\tt IWidget} forces the return type of {\tt AttachedGrommit} to be {\tt IGrommit}, so we can't simply change the type of this property.  However, we {\em can} implement the property with an explict backing field (instead of the implicit one we have currently).  We can freely set the type of that field to {\tt DatabaseGrommit}, meaning we keep the type information around for the compiler.  Meanwhile, {\tt AttachedGrommit.get} is resolved by an implicit upcast from our {\tt DatabaseGrommit} to the return type of {\tt IGrommit}.  Upcasts are always safe.
+
+Here's the improved version of {\tt Widget2}:
+
+\codelisting{Widget2c.cs}
+
+Notice that if our well-meaning developer comes along and tries to replace the constructor's {\tt DatabaseGrommit} with a {\tt ZeroGrommit}, the code will fail to compile due to the invalid assignment on line 8.  If they persist in their folly and change the type of the {\tt attachedGrommit} backing field, the compilation error in {\tt ApplyPlumbus} will reveal what the original developer was trying to do.
+
+\clearpage
+\begin{appendices}
+\section{Supporting types}
+
+\codelisting{IWidget.cs}
+
+\codelisting{IGrommit.cs}
+
+\codelisting{ZeroGrommit.cs}
+
+\codelisting{DatabaseGrommit.cs}
+
+\end{appendices}
+
+\end{document}
