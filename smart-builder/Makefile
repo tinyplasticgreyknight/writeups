@@ -1,4 +1,5 @@
 CSHARP=mcs
+CSFLAGS=-target:library -nologo
 RM=rm
 EXTRA_FILES=supporting_types.cs
 
@@ -18,8 +19,8 @@ clean:
 spotless: clean
 	-$(RM) $(IMG_EXAMPLES)
 
-%.dll: %.cs
-	$(CSHARP) -out:$@ -target:library $(EXTRA_FILES) $<
+%.dll: %.cs $(EXTRA_FILES)
+	$(CSHARP) $(CSFLAGS) -out:$@ $+
 
 %.png: %.dot
 	dot -Tpng $< > $@
