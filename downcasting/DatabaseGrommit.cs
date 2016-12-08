@@ -1,6 +1,6 @@
 public class DatabaseGrommit : IGrommit {
 	private DatabaseConnection dbconn;
-	private Guid ident;
+	private System.Guid ident;
 
 	public DatabaseGrommit(uint initialLen, DatabaseConnection dbconn) {
 		this.dbconn = dbconn;

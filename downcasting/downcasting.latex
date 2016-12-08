@@ -82,18 +82,18 @@ A very basic widget might be:
 
 \section{Grommit-modifying widget}
 
-Now suppose we need a kind of widget which can modify its grommit's size.  This is no problem, since we're using a {\tt DatabaseGrommit}, and that already exposes a means of modifying its size.
+Now suppose we need a kind of widget which can modify its grommit's length.  This is no problem, since we're using a {\tt DatabaseGrommit}, and that already exposes a means of modifying its length.
 
 Unfortunately the class was written to use a downcast to access the {\tt IGrommit} in the {\tt AttachedGrommit} property as a {\tt DatabaseGrommit}:
 
-\codelisting{Widget2.cs}
+\codelisting{Widget2a.cs}
 
 This is bad because we've thrown away important type information that the compiler could have used to benefit us.
 First we store the {\tt DatabaseGrommit} in a slot of type {\tt IGrommit}.  Later, we pull the value out again and manually (uh-oh!) reapply the {\tt DatabaseGrommit} type.  Since that cast will only be checked at runtime, it is now possible for us to make mistakes that the compiler would otherwise have caught easily.
 
 \section{Everything goes horribly wrong}
 
-A well-meaning developer notices that {\tt Widget1}'s grommit only ever has size zero, so it can be replaced with a {\tt ZeroGrommit} to save an expensive database query.  Since {\tt Widget2} appears to be doing the same thing, they also replace that grommit in the same way.  {\tt Widget2} now looks like this:
+A well-meaning developer notices that {\tt Widget1}'s grommit only ever has length zero, so it can be replaced with a {\tt ZeroGrommit} to save an expensive database query.  Since {\tt Widget2} appears to be doing the same thing, they also replace that grommit in the same way.  {\tt Widget2} now looks like this:
 
 \codelisting{Widget2b.cs}
 
@@ -117,6 +117,7 @@ Notice that if our well-meaning developer comes along and tries to replace the c
 \codelisting{IGrommit.cs}
 \codelisting{ZeroGrommit.cs}
 \codelisting{DatabaseGrommit.cs}
+\codelisting{IPlumbus.cs}
 
 \end{appendices}
 

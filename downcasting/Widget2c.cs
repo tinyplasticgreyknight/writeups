@@ -16,6 +16,6 @@ public class Widget2 : IWidget {
 
 	public void ApplyPlumbus(IPlumbus plumbus) {
 		uint newSize = plumbus.Radius;
-		attachedGrommit.SetSize(newSize);
+		attachedGrommit.SetLength(newSize);
 	}
 }
