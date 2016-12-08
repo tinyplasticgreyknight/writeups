@@ -9,8 +9,6 @@
 \usepackage[toc,page]{appendix}
 \usepackage{titlesec}
 
-\newcommand{\sectionbreak}{\clearpage}
-
 \definecolor{colourborder}{rgb}{0.3,0.3,0.3}
 \definecolor{colourbackground}{rgb}{1,1,1}
 \definecolor{colouridentifier}{rgb}{0.2,0.2,0.2}
@@ -39,7 +37,11 @@
   stringstyle=\color{colourstring},
   keywordstyle=\color{colourkeyword}\bfseries
 }
-\newcommand{\codelisting}[1]{\lstinputlisting[caption=#1, style=csharp]{#1}}
+\newcommand{\codelisting}[1]{
+\begin{minipage}{\textwidth}
+\lstinputlisting[caption=#1, style=csharp]{#1}
+\end{minipage}
+}
 
 \begin{document}
 
@@ -67,9 +69,9 @@ Presented here are a couple of grommit types, and an interface for the widgets w
   }
   \umlemptyclass[x=-2.2,y=0]{ZeroGrommit}
   \umlnote[x=-1,y=-0.5,width=4.5em]{ZeroGrommit}{returns 0}
-  \umlVHinherit{DatabaseGrommit}{IGrommit}
-  \umlVHinherit{ZeroGrommit}{IGrommit}
-  \umlHVaggreg{IWidget}{IGrommit}
+  \umlVHimpl{DatabaseGrommit}{IGrommit}
+  \umlVHimpl{ZeroGrommit}{IGrommit}
+  \umlHVcompo{IWidget}{IGrommit}
 \end{tikzpicture}
 
 \vspace{1em}
@@ -112,11 +114,8 @@ Notice that if our well-meaning developer comes along and tries to replace the c
 \section{Supporting types}
 
 \codelisting{IWidget.cs}
-
 \codelisting{IGrommit.cs}
-
 \codelisting{ZeroGrommit.cs}
-
 \codelisting{DatabaseGrommit.cs}
 
 \end{appendices}
